@@ -1,9 +1,11 @@
+from cProfile import label
 from locust import HttpLocust, HttpUser, TaskSet, task, run_single_user
 import json
 
 from requests import Response
 
 class HelloWorld(TaskSet):
+    label_sn = ""
     
     def on_start(self):
         print("on start")
@@ -29,6 +31,13 @@ class HelloWorld(TaskSet):
         response = self.client.post(url=url, data=json.dumps(body), headers=header)
         print(response)
         
+        if response.text is not None:
+            result = json.loads(response.text)
+            if "data" in result.keys():
+                global label_sn
+                label_sn = result["data"]["label_sn"]
+                print("->label_sn: {}".format(label_sn))
+        
 class WebsiteUser(HttpUser):
     tasks = [HelloWorld,]
     # host = "http://www.baidu.com"
@@ -38,12 +47,12 @@ class WebsiteUser(HttpUser):
     max_wait = 5000
 
 if __name__ == "__main__":
-    # # 启动方式1
-    # run_single_user(WebsiteUser)
+    # 启动方式1
+    run_single_user(WebsiteUser)
     
-    # 启动方式2
-    import os
-    os.system("locust -f locust/hello_world.py")
+    # # 启动方式2
+    # import os
+    # os.system("locust -f locust/hello_world.py")
     
     
     
