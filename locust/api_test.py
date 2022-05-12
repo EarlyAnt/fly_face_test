@@ -2,7 +2,6 @@ import json
 import random
 import PySimpleGUI as sg
 
-from cProfile import label
 from locust import HttpLocust, HttpUser, TaskSet, SequentialTaskSet, task, run_single_user
 
 image_folder = "/Users/gaobo/Desktop/Hair/01"
@@ -13,12 +12,11 @@ images = []
 def search_images():
     import os
     
-    if len(images) == 0:
-        file_list = sorted(os.listdir(image_folder))
-        for file in file_list:
-            if (file.startswith(".")):
-                continue
-            images.append("{}/{}".format(image_folder, file))
+    file_list = sorted(os.listdir(image_folder))
+    for file in file_list:
+        if (file.startswith(".")):
+            continue
+        images.append("{}/{}".format(image_folder, file))
 
 # 随机获取图片
 def get_random_image():
@@ -26,7 +24,6 @@ def get_random_image():
     if image_count > 0:
         index = random.randint(0, image_count - 1)
         image = images[index]
-        # print("->image: {}".format(image))
         print("\033[1;34m ->image: {}\033[0m".format(image))
         return image
     else:
@@ -62,7 +59,7 @@ def start_work():
 
                 # result = sg.popup_yes_no("现在开始压力测试吗？", title="确认")
                 # if str(result).lower() == "yes":
-                os.system("locust -f locust/hello_world.py")
+                os.system("locust -f locust/api_test.py")
         elif event in (None, 'Exit'):
             break
         print(str(values))
@@ -158,7 +155,7 @@ if __name__ == "__main__":
     
     # # 启动方式2
     # import os
-    # os.system("locust -f locust/hello_world.py")
+    # os.system("locust -f locust/api_test.py")
     
     # 启动方式3
     start_work()
