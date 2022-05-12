@@ -1,3 +1,4 @@
+import os
 import json
 import random
 import PySimpleGUI as sg
@@ -10,8 +11,6 @@ images = []
 
 # 收集图片
 def search_images():
-    import os
-    
     file_list = sorted(os.listdir(image_folder))
     for file in file_list:
         if (file.startswith(".")):
@@ -31,15 +30,15 @@ def get_random_image():
 
 # 选择图片所在目录的界面
 def start_work():
-    import os
-    
     version = 1.0
     sg.theme('Light Blue 2')
     
-    layout = [[sg.Text('功能说明：选择测试图片做在的目录，然后进行压力测试', text_color="blue")],
-              [sg.Button('OK'), sg.Button('Exit')],
+    layout = [[sg.Button('压力测试', key="OK"), 
+               sg.Button('清理缓存', key="Clean"), 
+               sg.Button('退出', key="Exit")],
               [sg.Text('选择目录', auto_size_text=True), sg.Input(size=(40, 1)), 
-               sg.FolderBrowse(key='-Folder-', initial_folder=os.path.dirname(__file__))]
+               sg.FolderBrowse(key='-Folder-', button_text = "浏览", initial_folder=os.path.dirname(__file__))],
+              [sg.Text('功能说明：选择测试图片做在的目录，然后进行压力测试', text_color="blue")]
              ]
 
     window = sg.Window('压力测试工具({})'.format(version), layout, resizable=True)
@@ -59,13 +58,19 @@ def start_work():
 
                 # result = sg.popup_yes_no("现在开始压力测试吗？", title="确认")
                 # if str(result).lower() == "yes":
-                os.system("locust -f locust/api_test.py")
+                os.system("locust -f {}/api_test.py".format(os.path.dirname(__file__)))
+        elif event == "Clean":
+            clean_cache()
         elif event in (None, 'Exit'):
+            clean_cache()
             break
         print(str(values))
         
     window.close()
     print(f'You clicked {event}')
+    
+def clean_cache():
+    os.system("sh {}/bld_cleanup.sh".format(os.getcwd()))
 
 # 接口压测
 class HelloWorld(SequentialTaskSet):
@@ -147,7 +152,7 @@ class WebsiteUser(HttpUser):
     host = "https://mcd-api.gululu.com/" # api release
     min_wait = 1000
     max_wait = 5000
-    
+
 # 入口
 if __name__ == "__main__":
     # # 启动方式1
@@ -155,10 +160,12 @@ if __name__ == "__main__":
     
     # # 启动方式2
     # import os
-    # os.system("locust -f locust/api_test.py")
+    # os.system("locust -f {}/api_test.py".format(os.path.dirname(__file__)))
     
     # 启动方式3
     start_work()
+    
+
     
     
     
